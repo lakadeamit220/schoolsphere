@@ -80,19 +80,19 @@ To understand how the data flows between tables, consider a real-life example of
 Every person who logs into the system (Admin, Teacher, Student, Parent) starts here.
 | id (UUID) | name | email | password | role |
 | :--- | :--- | :--- | :--- | :--- |
-| `user-101` | Admin User | admin@school.com | `hashed_pwd` | `ADMIN` |
-| `user-102` | Rahul Sharma | rahul@school.com | `hashed_pwd` | `TEACHER` |
+| `user-101` | Shruti Kulkarni | shruti@school.com | `hashed_pwd` | `ADMIN` |
+| `user-102` | Sandeep Deshmukh | sandeep@school.com | `hashed_pwd` | `TEACHER` |
 | `user-103` | Amit Lakade | amit@example.com | `hashed_pwd` | `STUDENT` |
-| `user-104` | Priya Patel | priya@example.com | `hashed_pwd` | `STUDENT` |
+| `user-104` | Neha Joshi | neha@example.com | `hashed_pwd` | `STUDENT` |
 
 ### 2. The Teacher Table (One-to-One with User)
-Because Rahul is a teacher, he gets an academic profile here. The `userId` links exactly to his record in the User table.
+Because Sandeep is a teacher, he gets an academic profile here. The `userId` links exactly to his record in the User table.
 | id (UUID) | userId | subject |
 | :--- | :--- | :--- |
 | `tch-001` | `user-102` | Mathematics |
 
 ### 3. The Student Table (One-to-One with User)
-Because Amit and Priya are students, they get academic profiles here.
+Because Amit and Neha are students, they get academic profiles here.
 | id (UUID) | userId | grade | rollNumber |
 | :--- | :--- | :--- | :--- |
 | `stu-001` | `user-103` | 10th Grade | 10A-45 |
