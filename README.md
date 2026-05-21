@@ -83,3 +83,35 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - Step 1: Develop an administrative view for Student financial records.
 - Step 2: Develop a form to record fee transactions and due dates.
 - Step 3: Implement financial status indicators (Pending vs. Paid) on the Student directory.
+
+---
+
+## Database Relationships Example
+
+To understand how the data flows between tables, consider a real-life example of a student named Amit Lakade.
+
+### 1. The User Table (The Core Identity)
+Every person who logs into the system starts here.
+| id (UUID) | name | email | password | role |
+| :--- | :--- | :--- | :--- | :--- |
+| `user-123` | Amit Lakade | amit@example.com | `hashed_pwd` | `STUDENT` |
+
+### 2. The Student Table (The Academic Profile)
+Because Amit is a student, he gets a profile here. The `userId` links exactly to the User table.
+| id (UUID) | userId | grade | rollNumber |
+| :--- | :--- | :--- | :--- |
+| `stu-456` | `user-123` | 10th Grade | 10A-45 |
+
+### 3. The Attendance Table (One-to-Many)
+Amit attends school over many days. The `studentId` links back to the Student table.
+| id (UUID) | studentId | date | status |
+| :--- | :--- | :--- | :--- |
+| `att-001` | `stu-456` | 2026-05-20 | `PRESENT` |
+| `att-002` | `stu-456` | 2026-05-21 | `ABSENT` |
+
+### 4. The Fee Table (One-to-Many)
+Amit has multiple fee records over the year. The `studentId` links back to the Student table.
+| id (UUID) | studentId | amount | dueDate | status |
+| :--- | :--- | :--- | :--- | :--- |
+| `fee-001` | `stu-456` | 500.00 | 2026-06-01 | `PAID` |
+| `fee-002` | `stu-456` | 500.00 | 2026-07-01 | `PENDING` |
