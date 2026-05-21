@@ -23,6 +23,62 @@ model User {
   email     String   @unique
   password  String
   role      Role     @default(STUDENT)
+  student   Student?
+  teacher   Teacher?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id         String       @id @default(uuid())
+  userId     String       @unique
+  user       User         @relation(fields: [userId], references: [id])
+  grade      String
+  rollNumber String       @unique
+  attendances Attendance[]
+  fees       Fee[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Teacher {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id])
+  subject    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum FeeStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  date      DateTime
+  status    AttendanceStatus @default(PRESENT)
+  studentId String
+  student   Student          @relation(fields: [studentId], references: [id])
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model Fee {
+  id        String    @id @default(uuid())
+  amount    Float
+  dueDate   DateTime
+  status    FeeStatus @default(PENDING)
+  studentId String
+  student   Student   @relation(fields: [studentId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
