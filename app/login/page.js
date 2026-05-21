@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { LogIn } from "lucide-react";
 import { useState } from "react";
-// We will import the login action in Step 4
-// import { loginUser } from "../actions/auth";
+import { loginUser } from "../actions/auth";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -12,15 +11,11 @@ export default function LoginPage() {
   async function handleSubmit(formData) {
     setError(""); // Clear previous errors
     
-    // Placeholder for Step 4
-    console.log("Form submitted!", formData.get("email"));
-    
-    /* 
     const response = await loginUser(formData);
+    
     if (response?.error) {
       setError(response.error);
     }
-    */
   }
 
   return (

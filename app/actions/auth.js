@@ -3,6 +3,8 @@
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 export async function registerUser(formData) {
   const name = formData.get("name");
@@ -44,4 +46,55 @@ export async function registerUser(formData) {
 
   // 4. Redirect the user to the login page (must be outside try/catch)
   redirect("/login");
+}
+
+export async function loginUser(formData) {
+  const email = formData.get("email");
+  const password = formData.get("password");
+
+  if (!email || !password) {
+    return { error: "Email and password are required." };
+  }
+
+  try {
+    // 1. Find the user in the database
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return { error: "Invalid email or password." };
+    }
+
+    // 2. Verify the password
+    const passwordMatch = await bcrypt.compare(password, user.password);
+
+    if (!passwordMatch) {
+      return { error: "Invalid email or password." };
+    }
+
+    // 3. Generate a JWT token
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET || "fallback_secret",
+      { expiresIn: "1d" } // Token expires in 1 day
+    );
+
+    // 4. Store the token in an HTTP-only cookie
+    const cookieStore = await cookies();
+    cookieStore.set("schoolsphere_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24, // 1 day in seconds
+      path: "/",
+    });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    return { error: "Something went wrong during login." };
+  }
+
+  // 5. Redirect to dashboard
+  redirect("/dashboard");
 }
