@@ -40,32 +40,37 @@ To run this project locally on your machine:
 - Step 5: Implement secure HTTP-only cookie storage for the JWT token.
 - Step 6: Implement Logout functionality and cookie invalidation.
 
-### Phase 3: Route Protection and Middleware
+### Phase 3: Professional Landing Page
+- Step 1: Design Hero Section and Value Proposition.
+- Step 2: Implement prominent Login and Register Call-to-Action buttons.
+- Step 3: Design Features Highlight section.
+
+### Phase 4: Route Protection and Middleware
 - Step 1: Initialize `middleware.js` in the project root.
 - Step 2: Implement JWT token verification logic.
 - Step 3: Enforce unauthenticated user redirection from protected routes (e.g., `/dashboard`) to the login page.
 - Step 4: Enforce authenticated user redirection from authentication routes to the dashboard.
 
-### Phase 4: Dashboard Layout and UI
+### Phase 5: Dashboard Layout and UI
 - Step 1: Develop a responsive Sidebar component using Tailwind CSS and Lucide React.
 - Step 2: Develop a Top Header component.
 - Step 3: Integrate components into the root layout (`app/layout.js`).
 - Step 4: Implement dynamic navigation rendering based on Role-Based Access Control (RBAC).
 
-### Phase 5: Student and Teacher Management (CRUD)
+### Phase 6: Student and Teacher Management (CRUD)
 - Step 1: Develop an administrative view for the Student directory.
 - Step 2: Develop an administrative view for the Teacher directory.
 - Step 3: Develop the Student Registration form utilizing React state management.
 - Step 4: Implement data persistence via Server Actions and UI invalidation via `revalidatePath`.
 - Step 5: Implement modification (Edit) and deletion (Delete) workflows for Students and Teachers.
 
-### Phase 6: Attendance Module
+### Phase 7: Attendance Module
 - Step 1: Develop a class and date selection interface for Teachers.
 - Step 2: Fetch and render the Student roster.
 - Step 3: Implement attendance status selection controls.
 - Step 4: Implement bulk attendance data persistence via Server Actions.
 
-### Phase 7: Fees Module (MVP)
+### Phase 8: Fees Module (MVP)
 - Step 1: Develop an administrative view for Student financial records.
 - Step 2: Develop a form to record fee transactions and due dates.
 - Step 3: Implement financial status indicators (Pending vs. Paid) on the Student directory.
