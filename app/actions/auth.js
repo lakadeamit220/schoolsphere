@@ -98,3 +98,13 @@ export async function loginUser(formData) {
   // 5. Redirect to dashboard
   redirect("/dashboard");
 }
+
+export async function logoutUser() {
+  const cookieStore = await cookies();
+  
+  // Invalidate and delete the authentication cookie
+  cookieStore.delete("schoolsphere_token");
+  
+  // Redirect the user back to the login page (or homepage)
+  redirect("/login");
+}
