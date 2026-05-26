@@ -40,6 +40,7 @@ export default async function StudentsPage() {
                 <th className="px-6 py-4 font-semibold">Email</th>
                 <th className="px-6 py-4 font-semibold">Grade</th>
                 <th className="px-6 py-4 font-semibold">Roll Number</th>
+                <th className="px-6 py-4 font-semibold text-center">Financial Status</th>
                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -62,6 +63,21 @@ export default async function StudentsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 font-mono text-gray-500">{student.rollNumber}</td>
+                    <td className="px-6 py-4 text-center">
+                      {/* Calculate financial status */}
+                      {(() => {
+                        const hasOverdue = student.fees?.some(f => f.status === "OVERDUE");
+                        const hasPending = student.fees?.some(f => f.status === "PENDING");
+                        
+                        if (hasOverdue) {
+                          return <span className="inline-block w-3 h-3 bg-red-500 rounded-full shadow-sm" title="Overdue Fees"></span>;
+                        }
+                        if (hasPending) {
+                          return <span className="inline-block w-3 h-3 bg-yellow-400 rounded-full shadow-sm" title="Pending Fees"></span>;
+                        }
+                        return <span className="inline-block w-3 h-3 bg-green-500 rounded-full shadow-sm" title="All Cleared"></span>;
+                      })()}
+                    </td>
                     <td className="px-6 py-4 text-right space-x-2">
                       <button className="text-gray-400 hover:text-blue-600 transition-colors p-1.5 rounded hover:bg-blue-50">
                         <Edit size={16} />

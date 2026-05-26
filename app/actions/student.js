@@ -10,6 +10,7 @@ export async function getStudents() {
     const students = await prisma.student.findMany({
       include: {
         user: true, // Fetch the related User data (Name, Email)
+        fees: true, // Fetch related Fees data
       },
       orderBy: {
         createdAt: "desc",
