@@ -118,3 +118,36 @@ export async function deleteStudent(id) {
     return { error: "Failed to delete student" };
   }
 }
+
+// GET STUDENT LIST (Lightweight -- for dropdown menus in Client Components)
+// Returns only plain serializable data (no Date objects)
+export async function getStudentList() {
+  try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
+
+    const students = await prisma.student.findMany({
+      select: {
+        id: true,
+        rollNumber: true,
+        user: {
+          select: {
+            name: true,
+          }
+        }
+      },
+      orderBy: {
+        user: {
+          name: "asc",
+        }
+      }
+    });
+
+    return { students };
+  } catch (error) {
+    console.error("Failed to fetch student list:", error);
+    return { error: "Failed to fetch student list" };
+  }
+}

@@ -5,7 +5,7 @@ import { ArrowLeft, Send } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createFee } from "@/app/actions/fee";
-import { getStudents } from "@/app/actions/student";
+import { getStudentList } from "@/app/actions/student";
 
 export default function AssignFeePage() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function AssignFeePage() {
   // Fetch students when component mounts
   useEffect(() => {
     async function loadStudents() {
-      const res = await getStudents();
+      const res = await getStudentList();
       if (res.students) {
         setStudents(res.students);
       }
