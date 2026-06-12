@@ -2,10 +2,16 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/lib/auth";
 
 // SAVE BULK ATTENDANCE
 export async function saveAttendance(dateStr, attendanceRecords) {
   try {
+    const user = await getCurrentUser();
+    if (!user || !["ADMIN", "TEACHER"].includes(user.role)) {
+      return { error: "Unauthorized access" };
+    }
+
     if (!dateStr || !attendanceRecords || attendanceRecords.length === 0) {
       return { error: "Date and attendance records are required." };
     }

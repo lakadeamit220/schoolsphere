@@ -2,10 +2,16 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/lib/auth";
 
 // GET ALL FEES
 export async function getFees() {
   try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
+
     const fees = await prisma.fee.findMany({
       include: {
         student: {
@@ -41,6 +47,11 @@ export async function getFees() {
 // CREATE NEW FEE
 export async function createFee(formData) {
   try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
+
     const studentId = formData.get("studentId");
     const amountStr = formData.get("amount");
     const dueDateStr = formData.get("dueDate");
@@ -79,6 +90,11 @@ export async function createFee(formData) {
 // MARK FEE AS PAID
 export async function markFeeAsPaid(id) {
   try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
+
     await prisma.fee.update({
       where: { id },
       data: { status: "PAID" },

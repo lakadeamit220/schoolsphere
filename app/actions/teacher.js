@@ -3,10 +3,16 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { getCurrentUser } from "@/lib/auth";
 
 // GET ALL TEACHERS
 export async function getTeachers() {
   try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
+
     const teachers = await prisma.teacher.findMany({
       include: {
         user: true, // Fetch the related User data (Name, Email)
@@ -25,6 +31,11 @@ export async function getTeachers() {
 // CREATE NEW TEACHER
 export async function createTeacher(formData) {
   try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
+
     const name = formData.get("name");
     const email = formData.get("email");
     const password = formData.get("password");
@@ -72,15 +83,20 @@ export async function createTeacher(formData) {
 // DELETE TEACHER
 export async function deleteTeacher(id) {
   try {
-    // Delete the Teacher profile
-    const teacher = await prisma.teacher.delete({
-      where: { id },
-    });
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
 
-    // Also delete the underlying User account
-    await prisma.user.delete({
-      where: { id: teacher.userId },
-    });
+    const teacher = await prisma.teacher.findUnique({ where: { id } });
+    if (!teacher) {
+      return { error: "Teacher not found" };
+    }
+
+    await prisma.$transaction([
+      prisma.teacher.delete({ where: { id } }),
+      prisma.user.delete({ where: { id: teacher.userId } }),
+    ]);
 
     revalidatePath("/dashboard/teachers");
     return { success: true };

@@ -3,10 +3,16 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
+import { getCurrentUser } from "@/lib/auth";
 
 // GET ALL STUDENTS
 export async function getStudents() {
   try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
+
     const students = await prisma.student.findMany({
       include: {
         user: true, // Fetch the related User data (Name, Email)
@@ -26,6 +32,11 @@ export async function getStudents() {
 // CREATE NEW STUDENT
 export async function createStudent(formData) {
   try {
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
+
     const name = formData.get("name");
     const email = formData.get("email");
     const password = formData.get("password");
@@ -81,15 +92,24 @@ export async function createStudent(formData) {
 // DELETE STUDENT
 export async function deleteStudent(id) {
   try {
-    // Delete the Student profile
-    const student = await prisma.student.delete({
-      where: { id },
-    });
+    const user = await getCurrentUser();
+    if (!user || user.role !== "ADMIN") {
+      return { error: "Unauthorized access" };
+    }
 
-    // Also delete the underlying User account
-    await prisma.user.delete({
-      where: { id: student.userId },
-    });
+    // Fetch the student first to get their userId
+    const student = await prisma.student.findUnique({ where: { id } });
+    if (!student) {
+      return { error: "Student not found" };
+    }
+
+    // Delete in correct order inside a transaction (children first, then parent)
+    await prisma.$transaction([
+      prisma.attendance.deleteMany({ where: { studentId: id } }),
+      prisma.fee.deleteMany({ where: { studentId: id } }),
+      prisma.student.delete({ where: { id } }),
+      prisma.user.delete({ where: { id: student.userId } }),
+    ]);
 
     revalidatePath("/dashboard/students");
     return { success: true };
