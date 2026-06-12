@@ -49,7 +49,7 @@ export default async function StudentsPage() {
               {!students || students.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
-                    No students found. Click "Add Student" to create one.
+                    No students found. Click &quot;Add Student&quot; to create one.
                   </td>
                 </tr>
               ) : (

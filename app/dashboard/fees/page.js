@@ -48,7 +48,7 @@ export default async function FeesPage() {
               {!fees || fees.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
-                    No fees have been recorded yet. Click "Assign Fee" to create one.
+                    No fees have been recorded yet. Click &quot;Assign Fee&quot; to create one.
                   </td>
                 </tr>
               ) : (

@@ -47,7 +47,7 @@ export default async function TeachersPage() {
               {!teachers || teachers.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="px-6 py-10 text-center text-gray-500">
-                    No teachers found. Click "Add Teacher" to create one.
+                    No teachers found. Click &quot;Add Teacher&quot; to create one.
                   </td>
                 </tr>
               ) : (
