@@ -1,65 +1,97 @@
+# The name of the workflow as it will appear in the GitHub Actions UI.
 name: Build Check
 
+# The 'on' keyword specifies the triggers for this workflow.
 on:
+  # Trigger when a push happens.
   push:
+    # Only run for pushes to the "master" branch.
     branches: [ "master" ]
+  # Trigger when a pull request is made.
   pull_request:
+    # Only run for pull requests targeting the "master" branch.
     branches: [ "master" ]
 
+# Define the jobs to run.
 jobs:
+  # We define a job named "build".
   build:
+    # Spin up a fresh Ubuntu Linux server to run this job.
     runs-on: ubuntu-latest
 
-    # 1. SERVICES: We spin up a temporary database just for this workflow run
+    # The 'services' keyword allows us to spin up background services (like databases) alongside the runner.
     services:
+      # We define a temporary service container named "postgres".
       postgres:
+        # We use the official PostgreSQL Docker image (version 15).
         image: postgres:15
+        # Set environment variables inside the PostgreSQL container to configure it.
         env:
+          # Set the master username for the database.
           POSTGRES_USER: admin
+          # Set the master password for the database.
           POSTGRES_PASSWORD: password123
+          # Specify the name of the database to automatically create upon startup.
           POSTGRES_DB: schoolsphere_test
-        # Wait until the database is ready
+        # Configure health checks to ensure the database is fully booted before moving to the next steps.
+        # pg_isready is a built-in postgres tool to check if it's accepting connections.
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        # Map port 5432 inside the container to port 5432 on the runner machine so Next.js can connect to it.
         ports:
           - 5432:5432
 
-    # 2. ENVIRONMENT VARIABLES: Next.js and Prisma need this during the build
+    # The 'env' keyword defines environment variables available to all steps in this job.
     env:
+      # We define DATABASE_URL using the exact credentials we just set in the 'services' block above.
+      # Format: postgresql://USER:PASSWORD@localhost:PORT/DATABASE_NAME
       DATABASE_URL: postgresql://admin:password123@localhost:5432/schoolsphere_test
 
+    # The sequence of tasks to execute.
     steps:
+      # Step 1: Download the repository code onto the runner.
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Step 2: Install Node.js version 20 on the runner.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # 3. CACHING: This speeds up subsequent runs by saving downloaded packages
+      # Step 3: Set up caching to make future workflow runs much faster.
       - name: Cache dependencies
+        # Uses an official GitHub Action for caching files.
         uses: actions/cache@v4
         with:
+          # Tell the cache action which directories to save/restore.
+          # We save the global npm cache and the Next.js build cache.
           path: |
             ~/.npm
             ${{ github.workspace }}/.next/cache
+          # Create a unique key for the cache based on the OS and the contents of your lockfile and source files.
+          # If the files don't change, it uses the cached versions instantly. If they do, it creates a new cache.
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          # Fallback keys to try if the exact key isn't found.
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
+      # Step 4: Install all the project dependencies using the package.json.
       - name: Install Dependencies
         run: npm install
 
-      # 4. DATABASE SETUP: We generate Prisma client and apply the schema to our temporary DB
+      # Step 5: Prepare the database schema.
       - name: Setup Database Schema
+        # The '|' character allows us to run multiple command-line commands on separate lines.
         run: |
+          # Generate the Prisma Client so Next.js can talk to the database (this is what caused your error earlier!).
           npx prisma generate
+          # Push the schema from prisma/schema.prisma into our temporary empty PostgreSQL database.
           npx prisma db push
 
-      # 5. THE BUILD: Finally, we attempt to build the Next.js application
+      # Step 6: Finally, build the Next.js application to ensure there are no compilation or rendering errors.
       - name: Build Next.js App
         run: npm run build

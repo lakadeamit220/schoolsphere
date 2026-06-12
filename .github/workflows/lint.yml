@@ -1,34 +1,48 @@
+# The name of the workflow as it will appear in the GitHub Actions UI.
 name: Lint Code Base
 
-# 1. TRIGGERS: When should this workflow run?
+# The 'on' keyword specifies the triggers that cause this workflow to run.
 on:
+  # Trigger the workflow when code is pushed to a specific branch.
   push:
+    # Specifically, only run when the push is to the "master" branch.
     branches: [ "master" ]
+  # Also trigger the workflow when a Pull Request is opened or updated.
   pull_request:
+    # Only run for pull requests targeting the "master" branch.
     branches: [ "master" ]
 
-# 2. JOBS: What tasks should be performed?
+# The 'jobs' section defines one or more jobs that run in parallel (or sequentially if dependencies are set).
 jobs:
+  # We are defining a single job named "lint".
   lint:
-    # What kind of server should this run on?
+    # Specifies the operating system the GitHub runner will use.
+    # 'ubuntu-latest' means GitHub will spin up a fresh Ubuntu Linux virtual machine just for you.
     runs-on: ubuntu-latest
 
-    # 3. STEPS: The individual actions the job will take, in order.
+    # The 'steps' section contains the sequence of tasks to execute on the runner.
     steps:
-      # Step 1: Download your code onto the GitHub Actions server
+      # Step 1: Give this step a human-readable name.
       - name: Checkout Code
+        # Uses an official pre-built GitHub Action to securely download (checkout) your repository's code.
         uses: actions/checkout@v4
 
-      # Step 2: Install Node.js so we can run npm commands
+      # Step 2: Give this step a human-readable name.
       - name: Setup Node.js
+        # Uses an official pre-built GitHub Action to install Node.js on the runner.
         uses: actions/setup-node@v4
+        # The 'with' keyword provides configuration arguments to the action.
         with:
+          # We specify that we want Node.js version 20 installed.
           node-version: '20' 
 
-      # Step 3: Install your project's dependencies
+      # Step 3: Give this step a human-readable name.
       - name: Install Dependencies
+        # The 'run' keyword executes a command-line script.
+        # We run 'npm install' to download all the packages defined in your package.json.
         run: npm install
 
-      # Step 4: Run the Next.js linter
+      # Step 4: Give this step a human-readable name.
       - name: Run ESLint
+        # We run 'npm run lint' which executes the ESLint script from your package.json to check for syntax errors.
         run: npm run lint
