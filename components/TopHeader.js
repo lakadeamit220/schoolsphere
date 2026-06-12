@@ -4,7 +4,7 @@ import { LogOut, Bell, Search } from "lucide-react";
 import { logoutUser } from "@/app/actions/auth";
 import { usePathname } from "next/navigation";
 
-export default function TopHeader() {
+export default function TopHeader({ userName, userRole }) {
   const pathname = usePathname();
   
   // Create a nice title from the pathname (e.g., "/dashboard/students" -> "Students")
@@ -39,8 +39,14 @@ export default function TopHeader() {
 
         {/* Profile / Logout */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm hidden sm:flex">
-            A {/* Placeholder for User Initial */}
+          <div className="hidden sm:flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+              {userName?.charAt(0)?.toUpperCase() || "U"}
+            </div>
+            <div className="text-sm">
+              <p className="font-semibold text-gray-800 leading-tight">{userName}</p>
+              <p className="text-xs text-gray-400">{userRole}</p>
+            </div>
           </div>
           
           <form action={logoutUser}>

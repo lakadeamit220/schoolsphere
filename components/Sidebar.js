@@ -15,15 +15,15 @@ import {
 import { useState } from "react";
 
 const NAV_LINKS = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Students", href: "/dashboard/students", icon: GraduationCap },
-  { name: "Teachers", href: "/dashboard/teachers", icon: Users },
-  { name: "Attendance", href: "/dashboard/attendance", icon: CalendarCheck },
-  { name: "Fees", href: "/dashboard/fees", icon: CreditCard },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, allowedRoles: ["ADMIN", "TEACHER", "STUDENT"] },
+  { name: "Students", href: "/dashboard/students", icon: GraduationCap, allowedRoles: ["ADMIN"] },
+  { name: "Teachers", href: "/dashboard/teachers", icon: Users, allowedRoles: ["ADMIN"] },
+  { name: "Attendance", href: "/dashboard/attendance", icon: CalendarCheck, allowedRoles: ["ADMIN", "TEACHER"] },
+  { name: "Fees", href: "/dashboard/fees", icon: CreditCard, allowedRoles: ["ADMIN"] },
+  { name: "Settings", href: "/dashboard/settings", icon: Settings, allowedRoles: ["ADMIN"] },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ role }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -51,7 +51,7 @@ export default function Sidebar() {
 
         {/* Navigation Links */}
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-          {NAV_LINKS.map((link) => {
+          {NAV_LINKS.filter((link) => link.allowedRoles.includes(role)).map((link) => {
             const Icon = link.icon;
             const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
 

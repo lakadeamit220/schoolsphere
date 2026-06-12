@@ -1,42 +1,80 @@
 import { NextResponse } from "next/server";
 
-// This function runs before EVERY page load
+// Simple JWT decode (without full verification -- middleware runs at the edge)
+// Full verification happens in getCurrentUser() on the server
+function decodeJwtPayload(token) {
+  try {
+    const payload = token.split(".")[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
+// Define which roles can access which route prefixes
+const ROLE_ROUTE_MAP = {
+  "/dashboard/students": ["ADMIN"],
+  "/dashboard/teachers": ["ADMIN"],
+  "/dashboard/attendance": ["ADMIN", "TEACHER"],
+  "/dashboard/fees": ["ADMIN"],
+  "/dashboard/settings": ["ADMIN"],
+  "/dashboard": ["ADMIN", "TEACHER", "STUDENT"], // Base dashboard is open to all
+};
+
 export function middleware(request) {
   const path = request.nextUrl.pathname;
-  
-  // Define which paths are protected (require login)
+
   const isProtectedRoute = path.startsWith("/dashboard");
-  
-  // Define which paths are public/auth (shouldn't be accessed if already logged in)
   const isAuthRoute = path === "/login";
 
-  // Get the token from cookies (Simple Custom Logic)
   const token = request.cookies.get("schoolsphere_token")?.value;
 
-  // 1. If trying to access a protected route without a token, redirect to login
+  // 1. No token + trying to access dashboard -> go to login
   if (isProtectedRoute && !token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // 2. If trying to access login/register WITH a token, redirect to dashboard
+  // 2. Has token + trying to access login -> go to dashboard
   if (isAuthRoute && token) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // Allow the request to continue normally
+  // 3. Role-based route protection for dashboard sub-routes
+  if (isProtectedRoute && token) {
+    const payload = decodeJwtPayload(token);
+
+    if (!payload || !payload.role) {
+      // Invalid token -> clear it and go to login
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      response.cookies.delete("schoolsphere_token");
+      return response;
+    }
+
+    const userRole = payload.role;
+
+    // Check specific routes (most specific first)
+    // We iterate through the map and find the most specific match
+    const matchingRoutes = Object.keys(ROLE_ROUTE_MAP)
+      .filter((route) => path.startsWith(route))
+      .sort((a, b) => b.length - a.length); // Sort by length, longest first
+
+    if (matchingRoutes.length > 0) {
+      const bestMatch = matchingRoutes[0];
+      const allowedRoles = ROLE_ROUTE_MAP[bestMatch];
+
+      if (!allowedRoles.includes(userRole)) {
+        // User does not have permission -> redirect to base dashboard
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+    }
+  }
+
   return NextResponse.next();
 }
 
-// Configure which paths this middleware runs on
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
-     */
     "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
