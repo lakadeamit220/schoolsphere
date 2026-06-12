@@ -27,7 +27,7 @@ jobs:
 
       # Step 3: Install your project's dependencies
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
       # Step 4: Run the Next.js linter
       - name: Run ESLint
