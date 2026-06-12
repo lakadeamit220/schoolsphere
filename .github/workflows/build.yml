@@ -1,0 +1,65 @@
+name: Build Check
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # 1. SERVICES: We spin up a temporary database just for this workflow run
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password123
+          POSTGRES_DB: schoolsphere_test
+        # Wait until the database is ready
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    # 2. ENVIRONMENT VARIABLES: Next.js and Prisma need this during the build
+    env:
+      DATABASE_URL: postgresql://admin:password123@localhost:5432/schoolsphere_test
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 3. CACHING: This speeds up subsequent runs by saving downloaded packages
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Install Dependencies
+        run: npm install
+
+      # 4. DATABASE SETUP: We generate Prisma client and apply the schema to our temporary DB
+      - name: Setup Database Schema
+        run: |
+          npx prisma generate
+          npx prisma db push
+
+      # 5. THE BUILD: Finally, we attempt to build the Next.js application
+      - name: Build Next.js App
+        run: npm run build
