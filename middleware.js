@@ -8,7 +8,7 @@ export function middleware(request) {
   const isProtectedRoute = path.startsWith("/dashboard");
   
   // Define which paths are public/auth (shouldn't be accessed if already logged in)
-  const isAuthRoute = path === "/login" || path === "/register";
+  const isAuthRoute = path === "/login";
 
   // Get the token from cookies (Simple Custom Logic)
   const token = request.cookies.get("schoolsphere_token")?.value;
