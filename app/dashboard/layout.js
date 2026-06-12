@@ -9,7 +9,7 @@ export default async function DashboardLayout({ children }) {
   // If no valid user session, redirect to login
   // (This is a backup safety net in addition to middleware)
   if (!user) {
-    redirect("/login");
+    redirect("/logout");
   }
 
   return (
