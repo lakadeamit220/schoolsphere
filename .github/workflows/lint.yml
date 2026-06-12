@@ -1,0 +1,34 @@
+name: Lint Code Base
+
+# 1. TRIGGERS: When should this workflow run?
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+# 2. JOBS: What tasks should be performed?
+jobs:
+  lint:
+    # What kind of server should this run on?
+    runs-on: ubuntu-latest
+
+    # 3. STEPS: The individual actions the job will take, in order.
+    steps:
+      # Step 1: Download your code onto the GitHub Actions server
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Install Node.js so we can run npm commands
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' 
+
+      # Step 3: Install your project's dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # Step 4: Run the Next.js linter
+      - name: Run ESLint
+        run: npm run lint
