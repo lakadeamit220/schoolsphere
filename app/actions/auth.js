@@ -76,7 +76,7 @@ export async function loginUser(formData) {
     // 3. Generate a JWT token
     const token = jwt.sign(
       { userId: user.id, role: user.role },
-      process.env.JWT_SECRET || "fallback_secret",
+      process.env.JWT_SECRET,
       { expiresIn: "1d" } // Token expires in 1 day
     );
 
