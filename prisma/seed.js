@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = "admin@gmail.com";
+  const email = "lakadeamit220@gmail.com";
 
   // Check if admin already exists
   const existingAdmin = await prisma.user.findUnique({
@@ -20,7 +20,7 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      name: "SchoolSphere Admin",
+      name: "Amit Lakade",
       email,
       password: hashedPassword,
       role: "ADMIN",
@@ -28,7 +28,7 @@ async function main() {
   });
 
   console.log("Admin account created successfully!");
-  console.log("Email: admin@gmail.com");
+  console.log("Email: lakadeamit220@gmail.com");
   console.log("Password: admin");
   console.log("IMPORTANT: Change this password after first login.");
 }
