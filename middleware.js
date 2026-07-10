@@ -4,10 +4,23 @@ import { NextResponse } from "next/server";
 // Full verification happens in getCurrentUser() on the server
 function decodeJwtPayload(token) {
   try {
-    const payload = token.split(".")[1];
+    let payload = token.split(".")[1];
+    
+    // JWTs are base64url encoded. We must convert them to standard base64
+    // by replacing '-' with '+' and '_' with '/' before using atob().
+    payload = payload.replace(/-/g, "+").replace(/_/g, "/");
+    
+    // Add missing '=' padding if necessary
+    const pad = payload.length % 4;
+    if (pad) {
+      if (pad === 1) throw new Error("Invalid base64url length");
+      payload += new Array(5 - pad).join("=");
+    }
+
     const decoded = JSON.parse(atob(payload));
     return decoded;
-  } catch {
+  } catch (error) {
+    console.error("JWT Decode Error in Middleware:", error);
     return null;
   }
 }
