@@ -92,7 +92,7 @@ export async function GET(request) {
     cookieStore.set("schoolsphere_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 60 * 60 * 24, // 1 day in seconds
       path: "/",
     });
